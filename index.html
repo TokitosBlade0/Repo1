@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Satır Arası</title>
+<meta name="description" content="Okudukça değişen müzik: kitaplığını kur, okurken müzik paragrafın havasını izlesin.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#1d1a17">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/emblem.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..600&family=Instrument+Sans:wght@400..600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+</head>
+<body data-screen="boot">
+
+<!-- Simgeler -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7M8.5 12H20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5.5h3.2v13H7zM13.8 5.5H17v13h-3.2z" fill="currentColor"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 010 6M17.8 6.8a7 7 0 010 10.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-other" viewBox="0 0 24 24"><path d="M4 7h3.5c4 0 5 10 9 10H20M4 17h3.5c1.6 0 2.7-1.6 3.6-3.4M13 10.4C13.9 8.6 15 7 16.5 7H20M17.5 4.5L20 7l-2.5 2.5M17.5 14.5L20 17l-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-type" viewBox="0 0 24 24"><path d="M3.5 18L8 6.5 12.5 18M5.2 14h5.6M14.5 18l3-7.5 3 7.5M15.5 15.6h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 5a7 7 0 010 14z" fill="currentColor"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4v13H7z M14 3.5v4h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12.5 16.5v-6M10 13l2.5-2.5L15 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-paste" viewBox="0 0 24 24"><rect x="5.5" y="5" width="13" height="15.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 5V3.5h6V5M8.5 10.5h7M8.5 13.5h7M8.5 16.5h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="2.8" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></symbol>
+    <symbol id="i-focus" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="12" r="3.8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M11.8 12H20.5M17.5 12v3M20.5 12v2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M5 8.5h13l-3-3M19 15.5H6l3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M10 4.5H5.5v15H10M14.5 8l4 4-4 4M18.5 12H9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M9 17.5V6l10-2v11.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="6.8" cy="17.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="16.8" cy="15.5" r="2.3" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-mark" viewBox="0 0 24 24"><path d="M12 3l1.9 6.1L20 12l-6.1 2.9L12 21l-1.9-6.1L4 12l6.1-2.9z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<a class="skip" href="#main">İçeriğe geç</a>
+
+<!-- Kitaplık sahnesinin arka planı: derinlik katmanları -->
+<div id="backdrop" aria-hidden="true">
+  <div class="bd-img"><img src="assets/bg-library.jpg" alt="" onerror="this.remove()"><i class="bd-lamp"></i></div>
+  <div class="bd-haze"></div>
+  <div class="bd-glow"></div>
+  <canvas id="dust"></canvas>
+  <div class="bd-vignette"></div>
+</div>
+
+<main id="main">
+
+<!-- A) Giriş / profil -->
+<section id="scr-welcome" class="screen welcome" aria-labelledby="wFormTitle" hidden>
+  <div class="w-frame">
+    <div class="w-plate">
+      <div class="emblem"><img src="assets/emblem.jpg" alt="" onerror="this.remove()"><span class="emblem-fallback" aria-hidden="true">SA</span></div>
+      <p class="w-kicker">Ex libris</p>
+      <h1 class="w-word">Satır Arası</h1>
+      <p class="w-lede">Okudukça değişen müzik. Hangi paragrafın üstündeysen müzik onun havasına geçer; sahne değişmedikçe parça da değişmez.</p>
+      <ol class="w-steps">
+        <li><span>I</span>Kitaplığını kur: kendi .txt ve .epub dosyaların ya da önerilen klasikler.</li>
+        <li><span>II</span>Sahneleri üç yoldan biriyle tanımlat: Gemini anahtarı, Claude hesabı (anahtar gerekmez) ya da anahtarsız, tarayıcında yerel çözümleme.</li>
+        <li><span>III</span>Oku. Müzik seni izler, sen müziği izlemezsin.</li>
+      </ol>
+      <div id="wProfiles" class="w-profiles" hidden>
+        <h2 class="w-sub">Bu tarayıcıdaki profiller</h2>
+        <ul id="wProfileList" class="w-plist"></ul>
+      </div>
+    </div>
+
+    <form id="wForm" class="w-form" autocomplete="off" novalidate>
+      <h2 id="wFormTitle" class="w-title">Hoş geldin</h2>
+      <p id="wFormLede" class="w-formlede">Bir profil oluştur. Her profilin kendi anahtarları, kitaplığı ve kaldığı yerler olur.</p>
+
+      <label class="fld"><span class="fld-l">Adın</span>
+        <input id="wName" name="name" type="text" maxlength="40" placeholder="Örneğin Defne" autocomplete="nickname" required>
+      </label>
+
+      <div class="fld">
+        <label class="fld-l" for="wKey">Gemini API anahtarı</label>
+        <div class="keyrow">
+          <input id="wKey" name="gkey" type="password" spellcheck="false" autocomplete="off" placeholder="AIza…" aria-describedby="wKeyHelp">
+          <button type="button" class="btn icon ghost" id="wKeyShow" aria-label="Anahtarı göster" aria-pressed="false"><svg class="ic"><use href="#i-eye"/></svg></button>
+        </div>
+        <p id="wKeyHelp" class="help">Ücretsiz anahtarı <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a> adresinden alırsın: Google hesabınla gir, “Create API key”e bas, çıkan anahtarı buraya yapıştır. Gemini her paragrafın sahnesini ve havasını okur.</p>
+        <div class="testrow">
+          <button type="button" class="btn line" id="wTest"><svg class="ic"><use href="#i-key"/></svg>Bağlantıyı sına</button>
+          <p id="wTestMsg" class="testmsg" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <details class="fld more">
+        <summary>YouTube Data API anahtarı <span class="opt">isteğe bağlı</span></summary>
+        <input id="wYt" name="ykey" type="password" spellcheck="false" autocomplete="off" placeholder="AIza…" aria-label="YouTube Data API anahtarı">
+        <p class="help">Bu anahtarla müzik canlı olarak YouTube’daki Creative Commons lisanslı parçalar arasından aranır. Yoksa uygulamanın yerleşik, telifsiz müzik kataloğu kullanılır.</p>
+      </details>
+
+      <details class="fld more">
+        <summary>Gelişmiş <span class="opt">Gemini modeli</span></summary>
+        <input id="wModel" name="model" type="text" spellcheck="false" aria-label="Gemini modeli">
+      </details>
+
+      <p class="privacy"><svg class="ic"><use href="#i-lock"/></svg><span>Anahtarların yalnızca bu tarayıcıda (localStorage) saklanır. Bizim bir sunucumuz yok; istekler tarayıcından doğrudan Google’a gider. Ortak bir bilgisayardaysan işin bitince profili sil.</span></p>
+
+      <div class="w-actions">
+        <button type="submit" class="btn brass" id="wSave">Kaydet ve kitaplığa gir</button>
+        <button type="button" class="btn line" id="wSkip">Anahtarsız devam et</button>
+        <button type="button" class="btn line" id="wClaude">Claude hesabımla tanımlatırım (anahtar gerekmez)</button>
+        <button type="button" class="btn ghost" id="wCancel" hidden>Vazgeç</button>
+      </div>
+      <p class="help small" id="wSkipHelp">Anahtarsız devam edersen sahneler yalnızca yerel sözcük çözümlemesiyle bulunur.</p>
+    </form>
+  </div>
+</section>
+
+<!-- B) Menü: 3B kitaplık -->
+<section id="scr-menu" class="screen menu" aria-label="Kitaplık" hidden>
+  <header class="m-top">
+    <div class="m-brand">
+      <span class="emblem sm"><img src="assets/emblem.jpg" alt="" onerror="this.remove()"><span class="emblem-fallback" aria-hidden="true">SA</span></span>
+      <span class="m-word">Satır Arası</span>
+    </div>
+    <div class="m-tools">
+      <button class="btn line" id="mSurprise"><svg class="ic"><use href="#i-dice"/></svg>Sürpriz kitap</button>
+      <button class="btn line" id="mJourney" title="Okuma yolculuğu haritası ve “Bugünkü havam”">✦ Yolculuğum</button>
+      <button class="btn line" id="mAddTop"><svg class="ic"><use href="#i-plus"/></svg>Kitap ekle</button>
+      <button class="goal-ring" id="mGoal" type="button" aria-label="Okuma hedefi"><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="gr-bg" cx="18" cy="18" r="15"/><circle class="gr-fg" cx="18" cy="18" r="15"/></svg><span class="gr-t">0/20</span><span class="gr-s"></span></button>
+      <button class="prof" id="mProfile" aria-haspopup="dialog"><span class="mono" id="mProfInit">O</span><span class="prof-n" id="mProfName">Okur</span></button>
+    </div>
+  </header>
+
+  <div id="scene" class="scene">
+    <div id="world" class="world">
+      <section class="shelf" id="shelfMine" aria-labelledby="hMine">
+        <div class="shelf-back" aria-hidden="true"></div>
+        <div class="shelf-head">
+          <h2 id="hMine">Kitaplığım <span class="cnt" id="mineCount"></span></h2>
+          <div class="shelf-nav"><button class="btn icon ghost" data-dir="-1" aria-label="Rafı sola kaydır"><svg class="ic"><use href="#i-chev-l"/></svg></button><button class="btn icon ghost" data-dir="1" aria-label="Rafı sağa kaydır"><svg class="ic"><use href="#i-chev-r"/></svg></button></div>
+        </div>
+        <div class="shelf-row" id="rowMine" role="list"></div>
+        <div class="plank" aria-hidden="true"><div class="plank-top"></div></div>
+      </section>
+
+      <section class="shelf" id="shelfRec" aria-labelledby="hRec">
+        <div class="shelf-back" aria-hidden="true"></div>
+        <div class="shelf-head">
+          <h2 id="hRec">Önerilenler <span class="cnt" id="recCount"></span></h2>
+          <div class="rec-tabs" id="recTabs" role="group" aria-label="Önerilen bölümü"><button class="rec-tab" type="button" data-sec="tr" aria-pressed="true">Türk klasikleri</button><button class="rec-tab" type="button" data-sec="en" aria-pressed="false">Dünya klasikleri</button></div>
+          <div class="shelf-nav"><button class="btn icon ghost" data-dir="-1" aria-label="Rafı sola kaydır"><svg class="ic"><use href="#i-chev-l"/></svg></button><button class="btn icon ghost" data-dir="1" aria-label="Rafı sağa kaydır"><svg class="ic"><use href="#i-chev-r"/></svg></button></div>
+        </div>
+        <div class="shelf-row" id="rowRec" role="list"></div>
+        <div class="plank" aria-hidden="true"><div class="plank-top"></div></div>
+      </section>
+    </div>
+  </div>
+
+  <aside class="plaque" id="plaque" aria-live="polite">
+    <div class="pl-swatch" id="plSwatch" aria-hidden="true"></div>
+    <div class="pl-main">
+      <p class="pl-kicker" id="plKicker">Kitaplık</p>
+      <h3 class="pl-title" id="plTitle">Bir kitabın üstüne gel</h3>
+      <p class="pl-sub" id="plSub">Fareyle raflarda gez, sekme ve ok tuşlarıyla da olur.</p>
+    </div>
+    <p class="pl-blurb" id="plBlurb"></p>
+    <div class="pl-actions" id="plActions"></div>
+  </aside>
+
+  <p class="toast" id="toast" role="status" aria-live="polite"></p>
+</section>
+
+<!-- C) Okuma -->
+<section id="scr-reader" class="screen reader" aria-label="Okuma" hidden>
+  <div class="ribbon" id="ribbon" role="slider" tabindex="0" aria-label="Kitabın duygu şeridi ve konum" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-orientation="vertical">
+    <canvas id="ribbonCv"></canvas>
+    <span class="rb-thumb" id="rbThumb"></span>
+    <span class="rb-tip" id="rbTip" hidden></span>
+  </div>
+  <div class="src-tip" id="rSrcTip" role="tooltip" hidden></div>
+
+  <div class="r-scroll" id="rScroll">
+    <header class="r-top">
+      <button class="btn ghost r-back" id="rBack"><svg class="ic"><use href="#i-back"/></svg><span>Kitaplık</span></button>
+      <p class="r-book" id="rBook"></p>
+      <div class="r-tools">
+        <span class="src" id="rSrc" tabindex="0"><span class="src-dot" aria-hidden="true"></span><span id="rSrcT">Yerel çözümleme</span></span>
+        <button class="btn ghost src-retry" id="rRetry" type="button" hidden>Yeniden dene</button>
+        <button class="btn ghost src-retry" id="rClaude" type="button" title="Claude hesabınla sahneleri tanımlat (anahtar gerekmez)">Claude ile tanımla</button>
+        <button class="btn icon ghost mic" id="rMic" type="button" aria-pressed="false" aria-label="Sesli okuma: dinlemeyi başlat" title="Sesli okuma: sen okudukça sayfa ve müzik seni izler (Chrome/Edge)"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3.5" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 11.5a6.5 6.5 0 0013 0M12 18v2.5M8.5 20.5h7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+        <button class="btn ghost src-retry" id="rTts" type="button" aria-pressed="false" title="Sesli kitap: tarayıcı kitabı sesli okur, müzik hikâyeyi izler (çevrimdışı)">🔊 Sesli kitap</button>
+        <button class="btn ghost src-retry" id="rNotes" type="button" title="Altını çizdiklerin, notların ve alıntıların">✎ Notlarım</button>
+        <button class="btn icon ghost" id="rChapters" aria-label="Bölümler" title="Bölümler"><svg class="ic"><use href="#i-list"/></svg></button>
+        <button class="btn icon ghost" id="rFocus" aria-label="Odak modu" aria-pressed="false" title="Odak modu (F)"><svg class="ic"><use href="#i-focus"/></svg></button>
+        <button class="btn icon ghost" id="rTheme" aria-label="Koyu ve kâğıt tema arasında geç" title="Tema"><svg class="ic"><use href="#i-theme"/></svg></button>
+        <button class="btn ghost src-retry" id="rFeat" type="button" title="Karakter temaları, sahne sesleri, rol kipi, bölüm kartı, birlikte oku">✦ Özellikler</button>
+        <button class="btn ghost src-retry" id="rSleep"type="button" title="Uyku zamanlayıcısı: müzik yavaşça kısılıp durur">Uyku: kapalı</button>
+        <button class="btn icon ghost" id="rType"aria-label="Okuma ayarları" aria-expanded="false" aria-controls="rSettings" title="Okuma ayarları"><svg class="ic"><use href="#i-type"/></svg></button>
+      </div>
+    </header>
+
+    <div class="r-settings" id="rSettings" hidden>
+      <fieldset class="seg"><legend>Tema</legend>
+        <label><input type="radio" name="theme" value="auto"><span>Sistem</span></label>
+        <label><input type="radio" name="theme" value="dark"><span>Koyu</span></label>
+        <label><input type="radio" name="theme" value="paper"><span>Kâğıt</span></label>
+      </fieldset>
+      <label class="rng"><span>Yazı boyu <output id="oSize"></output></span><input type="range" id="sSize" min="15" max="26" step="1"></label>
+      <label class="rng"><span>Satır aralığı <output id="oLh"></output></span><input type="range" id="sLh" min="1.35" max="2.1" step="0.05"></label>
+      <label class="rng"><span>Sıcaklık <output id="oWarm"></output></span><input type="range" id="sWarm" min="0" max="1" step="0.05"></label>
+      <fieldset class="rd-set"><legend>Okunabilirlik</legend>
+        <label class="chk"><input type="checkbox" id="sAtk"><span>Atkinson Hyperlegible yazı tipi (harfler birbirinden daha kolay ayrılır)</span></label>
+        <label class="rng"><span>Harf aralığı <output id="oLs"></output></span><input type="range" id="sLs" min="0" max="0.12" step="0.01"></label>
+        <label class="rng"><span>Sözcük aralığı <output id="oWs"></output></span><input type="range" id="sWs" min="0" max="0.4" step="0.02"></label>
+        <label class="chk"><input type="checkbox" id="sRuler"><span>Satır odağı: imlecin olduğu satır bandı dışını karartır</span></label>
+      </fieldset>
+      <label class="chk"><input type="checkbox" id="sFocus"><span>Odak modu: yalnızca okuduğun yerin çevresi belirgin kalır</span></label>
+      <label class="chk"><input type="checkbox" id="sAuto"><span>Kitap açılınca müzik kendiliğinden başlasın</span></label>
+      <p class="help small">Kısayollar: M müzik, F odak modu, V sesli okuma.</p>
+      <div class="vlang-set"><span>Konuşma dilim (sesli okuma)</span><span class="vlang" role="group" aria-label="Konuşma dilim"><button type="button" class="btn ghost" data-sl="tr-TR" aria-pressed="false">Türkçe</button><button type="button" class="btn ghost" data-sl="en-US" aria-pressed="false">English</button></span></div>
+      <div class="vlang-set"><span>Kitap dili (bu kitap; sayfa takibi, sesli kitap, sözlük)</span><span class="vlang" role="group" aria-label="Kitap dili"><button type="button" class="btn ghost" data-bl="tr" aria-pressed="false">Türkçe</button><button type="button" class="btn ghost" data-bl="en" aria-pressed="false">İngilizce</button></span></div>
+      <p class="help small" id="rVoiceHelp">Sesli okuma: mikrofon düğmesine bas ve yüksek sesle oku; sayfa seni izler, müzik sahneye ve sesinin temposuna göre değişir. “Müziği değiştir”, “müziği durdur”, “müziği başlat”, “sesi aç”, “sesi kıs” komutlarını anlar. Chrome ve Edge’de (localhost ya da https) çalışır; tarayıcı sesi tanımak için Google sunucularına gönderir.</p>
+    </div>
+
+    <article class="r-text" id="rText"></article>
+  </div>
+
+  <aside class="np" id="np" aria-label="Şimdi çalıyor">
+    <div class="np-bar" id="npBar"><button class="btn icon brass" id="npBarPlay" type="button" aria-label="Müziği başlat" aria-pressed="false"><svg class="ic"><use id="npBarPlayUse" href="#i-play"/></svg></button><span class="np-bar-t" id="npBarTitle">Henüz parça yok</span><button class="btn icon ghost np-bar-x" id="npBarX" type="button" aria-expanded="false" aria-controls="np" aria-label="Oynatıcıyı aç">&#8963;</button></div>
+    <div class="np-head"><h2 class="np-kicker">Şimdi çalıyor</h2><span class="np-scene" id="npScene"></span></div>
+    <div class="np-stage">
+      <div class="np-host" id="musicHost"></div>
+      <div class="np-engine" id="npEngine" hidden><svg class="ic"><use href="#i-note"/></svg><span>Yerleşik besteci</span></div>
+    </div>
+    <div class="np-meta">
+      <p class="np-title" id="npTitle">Henüz parça yok</p>
+      <p class="np-artist" id="npArtist"></p>
+      <p class="np-credit" id="npCredit"></p>
+    </div>
+    <p class="np-note" id="npNote" hidden></p>
+    <div class="np-voice" id="npVoice" hidden>
+      <div class="vrow"><span class="vu" aria-hidden="true"><i id="npVu"></i></span>
+        <span class="vlang" role="group" aria-label="Konuşma dilim"><button type="button" class="btn ghost" data-sl="tr-TR" aria-pressed="false" title="Türkçe konuşuyorum">TR</button><button type="button" class="btn ghost" data-sl="en-US" aria-pressed="false" title="İngilizce konuşuyorum">EN</button></span>
+        <span class="vlang" role="group" aria-label="Kitap dili"><button type="button" class="btn ghost" data-bl="tr" aria-pressed="false" title="Kitap Türkçe">Kitap TR</button><button type="button" class="btn ghost" data-bl="en" aria-pressed="false" title="Kitap İngilizce">Kitap EN</button></span></div>
+      <p class="np-heardw" id="npHeardW" aria-live="off">Dinliyorum…</p>
+      <p class="np-vnote" id="npVNote" hidden></p>
+    </div>
+    <div class="np-ctl">
+      <button class="btn icon brass" id="npPlay" aria-label="Müziği başlat" aria-pressed="false"><svg class="ic"><use id="npPlayUse" href="#i-play"/></svg></button>
+      <label class="np-vol"><svg class="ic" aria-hidden="true"><use href="#i-vol"/></svg><input type="range" id="npVol" min="0" max="1" step="0.02" aria-label="Ses düzeyi"></label>
+      <button class="btn icon ghost" id="npOther" aria-label="Bu paragrafa başka müzik bul" title="Bu paragrafa başka müzik bul"><svg class="ic"><use href="#i-other"/></svg></button>
+      <button class="btn icon ghost np-rate" id="npLike" type="button" aria-pressed="false" aria-label="Bu parçayı beğendim" title="Beğendim — bu havada daha sık çalsın" hidden>👍</button>
+      <button class="btn icon ghost np-rate" id="npDislike" type="button" aria-pressed="false" aria-label="Bu parçayı beğenmedim" title="Beğenmedim — bu havada bir daha çalmasın" hidden>👎</button>
+      <button class="btn icon ghost" id="npLock" aria-label="Müziği sabitle" aria-pressed="false" title="Müziği sabitle"><svg class="ic"><use href="#i-lock"/></svg></button>
+    </div>
+    <label class="np-mood"><span>Hava</span><select id="npMood" aria-label="Müziğin havası"></select></label>
+    <details class="np-heard" id="npHeard">
+      <summary>Bu kitabın müzikleri <span id="npHeardN"></span></summary>
+      <ol id="npHeardList"></ol>
+      <div class="np-share" id="npShare" hidden>
+        <a class="btn line sm" id="npYtList" target="_blank" rel="noopener">YouTube'da çalma listesi olarak aç</a>
+        <button type="button" class="btn line sm" id="npCard">Kitap kartı (PNG)</button>
+      </div>
+    </details>
+  </aside>
+  <p class="toast r-toast" id="rToast" role="status" aria-live="polite"></p>
+</section>
+</main>
+
+<!-- Uçuş geçişi katmanı -->
+<div id="flight" aria-hidden="true" hidden></div>
+
+<!-- Bırakma bölgesi -->
+<div id="drop" class="drop" hidden><div><svg class="ic"><use href="#i-file"/></svg><p>Bırak, kitaplığına ekleyelim</p><span>.txt ya da .epub</span></div></div>
+
+<input type="file" id="fileIn" accept=".txt,.epub,text/plain,application/epub+zip" hidden multiple>
+
+<!-- Pencereler -->
+<dialog id="dlgAdd" class="dlg" aria-labelledby="dlgAddT">
+  <form method="dialog" class="dlg-in">
+    <header><h2 id="dlgAddT">Kitap ekle</h2><button class="btn icon ghost" value="x" aria-label="Kapat"><svg class="ic"><use href="#i-x"/></svg></button></header>
+    <div class="add-opts">
+      <button type="button" class="add-opt" id="addFile"><svg class="ic"><use href="#i-file"/></svg><strong>Dosya seç</strong><span>.txt ya da .epub. Metin bu tarayıcıdan çıkmaz.</span></button>
+      <button type="button" class="add-opt" id="addPaste"><svg class="ic"><use href="#i-paste"/></svg><strong>Metin yapıştır</strong><span>Bir öykü, bir bölüm, bir mektup.</span></button>
+    </div>
+    <p class="help">Dosyayı sayfanın herhangi bir yerine sürükleyip bırakabilirsin de. Kitap hemen okunabilir; çözümleme arka planda sürer.</p>
+  </form>
+</dialog>
+
+<dialog id="dlgPaste" class="dlg wide" aria-labelledby="dlgPasteT">
+  <form method="dialog" class="dlg-in" id="pasteForm">
+    <header><h2 id="dlgPasteT">Metin yapıştır</h2><button class="btn icon ghost" value="x" aria-label="Kapat" formnovalidate><svg class="ic"><use href="#i-x"/></svg></button></header>
+    <div class="two">
+      <label class="fld"><span class="fld-l">Başlık</span><input id="pTitle" type="text" maxlength="120" placeholder="Boş bırakırsan ilk satırdan alınır"></label>
+      <label class="fld"><span class="fld-l">Yazar</span><input id="pAuthor" type="text" maxlength="120"></label>
+    </div>
+    <label class="fld"><span class="fld-l">Metin</span><textarea id="pText" rows="10" placeholder="Paragrafları boş bir satırla ayır."></textarea></label>
+    <p class="help err" id="pErr" role="alert"></p>
+    <div class="dlg-act"><button class="btn ghost" value="x" formnovalidate>Vazgeç</button><button class="btn brass" value="ok" id="pOk">Kitaplığa ekle</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlgSurprise" class="dlg" aria-labelledby="dlgSurT">
+  <form method="dialog" class="dlg-in">
+    <header><h2 id="dlgSurT">Sürpriz kitap</h2><button class="btn icon ghost" value="x" aria-label="Kapat"><svg class="ic"><use href="#i-x"/></svg></button></header>
+    <p class="help">Bugün nasıl bir hava istiyorsun? Önerilenlerden birini seçip açalım.</p>
+    <div class="moods" id="surMoods"></div>
+  </form>
+</dialog>
+
+<dialog id="dlgProfile" class="dlg" aria-labelledby="dlgProfT">
+  <form method="dialog" class="dlg-in">
+    <header><h2 id="dlgProfT">Profil</h2><button class="btn icon ghost" value="x" aria-label="Kapat"><svg class="ic"><use href="#i-x"/></svg></button></header>
+    <dl class="kv" id="profKv"></dl>
+    <div class="stack">
+      <button type="button" class="btn line" id="pfEdit"><svg class="ic"><use href="#i-key"/></svg>Anahtarları düzenle</button>
+      <button type="button" class="btn line" id="pfSwitch"><svg class="ic"><use href="#i-swap"/></svg>Profil değiştir</button>
+      <button type="button" class="btn line" id="pfOut"><svg class="ic"><use href="#i-out"/></svg>Çıkış yap</button>
+      <button type="button" class="btn danger" id="pfDel"><svg class="ic"><use href="#i-trash"/></svg>Profili sil</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgChapters" class="dlg" aria-labelledby="dlgChT">
+  <form method="dialog" class="dlg-in">
+    <header><h2 id="dlgChT">Bölümler</h2><button class="btn icon ghost" value="x" aria-label="Kapat"><svg class="ic"><use href="#i-x"/></svg></button></header>
+    <ol class="chap-list" id="chapList"></ol>
+  </form>
+</dialog>
+
+<dialog id="dlgAsk" class="dlg" aria-labelledby="askT">
+  <form method="dialog" class="dlg-in">
+    <h2 id="askT">Emin misin?</h2>
+    <p id="askMsg" class="help"></p>
+    <div class="dlg-act"><button class="btn ghost" value="no">Vazgeç</button><button class="btn danger" value="yes" id="askOk">Sil</button></div>
+  </form>
+</dialog>
+
+<script src="core.js"></script>
+<script src="engine.js"></script>
+<script src="books.js"></script>
+<script src="keywords.js"></script>
+<script src="gemini.js"></script>
+<script src="music.js"></script>
+<script src="covers.js"></script>
+<script src="claude-handoff.js"></script>
+<script src="room.js"></script>
+<script src="ui.js"></script>
+<script>/* Kurulabilir uygulama: çevrimdışı okuma için hizmet çalışanı (yalnızca http/https) */
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
+</body>
+</html>

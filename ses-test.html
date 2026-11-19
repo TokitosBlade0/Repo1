@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ses tanıma testi</title>
+<style>
+body{margin:0;background:#11151a;color:#dfe3e6;font:15px/1.5 system-ui,sans-serif}
+main{max-width:46rem;margin:auto;padding:24px 16px}
+h1{font-size:1.4rem;margin:0 0 .3rem} p{color:#9aa4ad;margin:.2rem 0 1rem}
+button{font:inherit;padding:.6rem 1rem;border:1px solid #c9a35a;background:#c9a35a;color:#11151a;border-radius:4px;cursor:pointer;margin:0 .5rem .5rem 0}
+button.alt{background:transparent;color:#dfe3e6;border-color:#3a434c}
+pre{background:#0b0e12;border:1px solid #2a3139;padding:12px;white-space:pre-wrap;word-break:break-word;min-height:12rem}
+.ok{color:#7fd1a8}.bad{color:#f08a8a}
+</style></head><body><main>
+<h1>Ses tanıma testi</h1>
+<p>Bu sayfa uygulamadan bağımsız olarak yalnızca tarayıcının ses tanıma özelliğini sınar. “Testi başlat”a bas, mikrofona izin ver ve birkaç kelime söyle. Sonra aşağıdaki kutunun ekran görüntüsünü gönder.</p>
+<button id="go">Testi başlat</button><button class="alt" id="en">İngilizce dene</button><button class="alt" id="copy">Sonucu kopyala</button>
+<pre id="log"></pre>
+</main>
+<script>
+const L = document.getElementById('log');
+const log = (t, c) => { const s = document.createElement('span'); if (c) s.className = c; s.textContent = new Date().toLocaleTimeString('tr-TR') + '  ' + t + '\n'; L.appendChild(s); };
+async function env() {
+  const b = navigator.userAgentData ? navigator.userAgentData.brands.map(x => x.brand + ' ' + x.version).join(', ') : '(yok)';
+  log('Tarayıcı: ' + b);
+  log('Kullanıcı aracısı: ' + navigator.userAgent.replace(/^Mozilla\/5\.0 /, ''));
+  log('Güvenli bağlam: ' + isSecureContext + ' · adres: ' + location.origin);
+  log('Çevrimiçi: ' + navigator.onLine);
+  log('SpeechRecognition: ' + (window.SpeechRecognition ? 'standart' : window.webkitSpeechRecognition ? 'webkit' : 'YOK'), (window.SpeechRecognition || window.webkitSpeechRecognition) ? 'ok' : 'bad');
+  try { const p = await navigator.permissions.query({name: 'microphone'}); log('Mikrofon izni: ' + p.state); } catch (e) { log('Mikrofon izni sorgulanamadı'); }
+  try { const t0 = performance.now(); await fetch('https://www.google.com/generate_204', {mode: 'no-cors', cache: 'no-store'}); log('google.com erişimi: var (' + Math.round(performance.now() - t0) + ' ms)', 'ok'); }
+  catch (e) { log('google.com erişimi: YOK (' + e.message + ')', 'bad'); }
+}
+async function run(lang) {
+  L.textContent = ''; await env();
+  try { const s = await navigator.mediaDevices.getUserMedia({audio: true}); const tr = s.getAudioTracks()[0]; log('Mikrofon: açıldı (' + tr.label + ')', 'ok'); s.getTracks().forEach(t => t.stop()); }
+  catch (e) { log('Mikrofon: AÇILAMADI (' + e.name + ': ' + e.message + ')', 'bad'); }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
+  const r = new SR(); r.lang = lang; r.continuous = true; r.interimResults = true;
+  for (const ev of ['start', 'audiostart', 'soundstart', 'speechstart', 'speechend', 'soundend', 'audioend', 'end']) r.addEventListener(ev, () => log('olay: ' + ev));
+  r.onresult = e => { const x = e.results[e.results.length - 1]; log((x.isFinal ? 'SONUÇ: ' : 'ara: ') + x[0].transcript, x.isFinal ? 'ok' : ''); };
+  r.onerror = e => log('HATA: ' + e.error + (e.message ? ' (' + e.message + ')' : ''), 'bad');
+  log('Ses tanıma başlıyor, dil: ' + lang + '. Şimdi konuş…');
+  try { r.start(); } catch (e) { log('Başlatılamadı: ' + e.message, 'bad'); }
+  setTimeout(() => { try { r.stop(); } catch (e) {} log('Test bitti (15 sn).'); }, 15000);
+}
+document.getElementById('go').onclick = () => run('tr-TR');
+document.getElementById('en').onclick = () => run('en-US');
+document.getElementById('copy').onclick = () => navigator.clipboard.writeText(L.innerText).then(() => log('Panoya kopyalandı.', 'ok'), () => log('Kopyalanamadı; metni elle seç.', 'bad'));
+</script></body></html>

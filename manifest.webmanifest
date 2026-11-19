@@ -1,0 +1,19 @@
+{
+  "name": "Satır Arası — okudukça değişen müzik",
+  "short_name": "Satır Arası",
+  "description": "Kitaplığını kur; okurken müzik paragrafın havasını izlesin.",
+  "lang": "tr",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#14110e",
+  "theme_color": "#1d1a17",
+  "categories": ["books", "music", "education"],
+  "icons": [
+    {"src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"},
+    {"src": "assets/emblem.jpg", "sizes": "1024x1024", "type": "image/jpeg", "purpose": "any"}
+  ]
+}

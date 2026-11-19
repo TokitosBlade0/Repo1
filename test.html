@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Satır Arası — test alanı</title>
+<style>
+:root{--bg:#EEF0EF;--fg:#15181C;--mut:#555C63;--rule:#CDD2D1;--ok:#2C7F78;--bad:#B03A5B}
+@media (prefers-color-scheme:dark){:root{--bg:#0F1215;--fg:#C8CDD0;--mut:#8A9299;--rule:#272D33;--ok:#6FC2B6;--bad:#EC8CA3;color-scheme:dark}}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,sans-serif}
+main{max-width:60rem;margin:auto;padding:1.5rem max(16px,env(safe-area-inset-left,0px))}
+h1{font-size:1.4rem;margin:0 0 .2rem} h2{font-size:1rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--rule);padding-bottom:.3rem}
+p{color:var(--mut);margin:.2rem 0 1rem} .sum{font-size:1.1rem;font-weight:600}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums} td,th{text-align:left;padding:.25rem .6rem .25rem 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.ok{color:var(--ok)} .bad{color:var(--bad);font-weight:600} .wrapx{overflow-x:auto}
+button{font:inherit;padding:.4rem .8rem;border:1px solid var(--rule);background:transparent;color:inherit;border-radius:4px;cursor:pointer}
+</style></head><body><main>
+<h1>Satır Arası — test alanı</h1>
+<p>Çekirdek (algılama, hizalayıcı), sıralayıcı ve ses motoru burada otomatik sınanır. Ses ölçümleri çevrimdışı işlenir; hoparlörden bir şey çalmaz.</p>
+<div class="sum" id="sum">Çalışıyor…</div>
+<h2>Mantık testleri</h2><div class="wrapx"><table id="logic"></table></div>
+<h2>Ses ölçümleri (duygu başına 30 saniye, çevrimdışı)</h2>
+<p>Hedefler: tepe −1 dBFS altında, RMS −30 ile −16 dBFS arasında, duygular arası fark en çok 3 dB, ardışık örnek farkı 0,15 altında (tıkırtı yok), 5. saniyeden sonra yarım saniyelik sessizlik yok.</p>
+<div class="wrapx"><table id="audio"></table></div>
+<h2>Geçişler ve sızıntı</h2><div class="wrapx"><table id="misc"></table></div>
+<p><button id="listen">Sekiz duyguyu sırayla dinle (altışar saniye)</button></p>
+</main>
+<script src="core.js"></script><script src="engine.js"></script><script src="tests/cases.js"></script>
+<script>
+const row = (tb, cells, cls) => { const tr = document.createElement('tr'); cells.forEach((c, i) => { const td = document.createElement(cls === 'h' ? 'th' : 'td'); td.textContent = c; if (cls && cls !== 'h' && i === cells.length - 1) td.className = cls; tr.appendChild(td); }); document.getElementById(tb).appendChild(tr); };
+const dB = x => x > 0 ? 20 * Math.log10(x) : -Infinity;
+const R = window.__results = {logic: [], audio: [], misc: [], done: false};
+function measure(buf, fromSec) {
+  const sr = buf.sampleRate, a = buf.getChannelData(0), b = buf.getChannelData(1), s0 = Math.floor(fromSec * sr), win = Math.floor(sr * 0.5);
+  let peak = 0, sq = 0, delta = 0, dc = 0, silent = 0;
+  for (let i = 1; i < a.length; i++) { const m = (a[i] + b[i]) / 2, ab = Math.max(Math.abs(a[i]), Math.abs(b[i])); if (ab > peak) peak = ab; const d = Math.abs(a[i] - a[i - 1]); if (d > delta) delta = d; if (i >= s0) { sq += m * m; dc += m; } }
+  for (let w = s0; w + win <= a.length; w += win) { let e = 0; for (let i = w; i < w + win; i++) e += a[i] * a[i]; if (dB(Math.sqrt(e / win)) < -60) silent++; }
+  const n = a.length - s0;
+  return {peak: dB(peak), rms: dB(Math.sqrt(sq / n)), delta, dc: Math.abs(dc / n), silent};
+}
+async function render(secs, script) {
+  const ctx = new OfflineAudioContext(2, 44100 * secs, 44100), e = Engine.create(ctx, {seed: 11, offline: true, volume: 0.6});
+  script(e); return {buf: await ctx.startRendering(), e};
+}
+(async () => {
+  const cc = coreCases(Core), logic = [...cc, ...Engine.selfTest()];
+  R.logic = logic.map(r => ({name: r.name, ok: r.ok, detail: r.detail})); R.perfMs = cc.perfMs;
+  for (const r of logic) row('logic', [r.ok ? '✓' : '✗', r.name, r.detail || ' '], r.ok ? 'ok' : 'bad');
+  row('audio', ['Duygu', 'Tepe (dBFS)', 'RMS (dBFS)', 'En büyük örnek farkı', 'DC', 'Sessiz pencere', 'Sonuç'], 'h');
+  const t0 = performance.now();
+  for (let m = 0; m < 8; m++) {
+    const {buf} = await render(30, e => { e.set({mood: m, intensity: 0.6, confidence: 0.7, ambience: []}); e.advanceTo(30); });
+    const x = measure(buf, 5), ok = x.peak < -1 && x.rms > -30 && x.rms < -16 && x.delta < 0.15 && x.silent === 0 && x.dc < 0.001;
+    R.audio.push(Object.assign({mood: Core.MOODS[m], ok}, x));
+    row('audio', [Core.INFO[Core.MOODS[m]].ad, x.peak.toFixed(1), x.rms.toFixed(1), x.delta.toFixed(3), x.dc.toFixed(5), x.silent, ok ? 'geçti' : 'KALDI'], ok ? 'ok' : 'bad');
+  }
+  const rmss = R.audio.map(a => a.rms), spread = Math.max(...rmss) - Math.min(...rmss);
+  const M = (name, val, ok) => { R.misc.push({name, val, ok}); row('misc', [ok ? '✓' : '✗', name, val], ok ? 'ok' : 'bad'); };
+  M('Duygular arası ses yüksekliği farkı en çok 3 dB', spread.toFixed(1) + ' dB', spread <= 3);
+  { const {buf} = await render(64, e => { for (let k = 0; k < 8; k++) { e.set({mood: (k * 3) % 8, intensity: 0.4 + (k % 3) * 0.3, confidence: 0.6, ambience: k % 2 ? ['rain'] : ['sea', 'wind']}); e.advanceTo((k + 1) * 8); } });
+    const x = measure(buf, 5); M('Sekiz geçiş ve ortam sesleri: tepe, tıkırtı, sessizlik', `tepe ${x.peak.toFixed(1)} dBFS, fark ${x.delta.toFixed(3)}, sessiz ${x.silent}`, x.peak < -1 && x.delta < 0.15 && x.silent === 0); }
+  { const {buf} = await render(30, e => { e.set({mood: 4, intensity: 0.6, confidence: 0.7, mic: true, ambience: []}); e.advanceTo(30); });
+    const x = measure(buf, 5), base = R.audio[4].rms; M('Mikrofon kipinde müzik en az 5 dB kısılır', (base - x.rms).toFixed(1) + ' dB', base - x.rms >= 5); }
+  { const ctx = new OfflineAudioContext(2, 44100, 44100), e = Engine.create(ctx, {seed: 3, offline: true});
+    e.set({mood: 0, ambience: ['rain', 'wind', 'sea']}); e.advanceTo(1); const n0 = e.nodes;
+    for (let k = 0; k < 200; k++) { e.set({mood: k % 8, intensity: (k % 5) / 4, ambience: [['rain'], ['wind'], ['sea']][k % 3]}); e.advanceTo(1 + (k + 1) * 6); }
+    M('200 duygu değişiminden sonra düğüm sayısı değişmez', n0 + ' → ' + e.nodes, e.nodes === n0); }
+  M('8 × 30 saniyelik ses işleme süresi', Math.round(performance.now() - t0) + ' ms', true);
+  const bad = logic.filter(r => !r.ok).length + R.audio.filter(a => !a.ok).length + R.misc.filter(m => !m.ok).length;
+  const tot = logic.length + R.audio.length + R.misc.length;
+  document.getElementById('sum').textContent = bad ? `${bad} / ${tot} kontrol başarısız` : `${tot} kontrolün tamamı geçti`;
+  document.getElementById('sum').className = 'sum ' + (bad ? 'bad' : 'ok');
+  R.bad = bad; R.total = tot; R.spread = spread; R.done = true;
+})().catch(e => { document.getElementById('sum').textContent = 'Test alanı hata verdi: ' + e.message; document.getElementById('sum').className = 'sum bad'; R.error = e.message + ' ' + e.stack; R.done = true; });
+let live = null;
+document.getElementById('listen').addEventListener('click', async () => {
+  if (!live) live = Engine.create(new AudioContext(), {seed: 5});
+  await live.start(); let k = 0; live.set({mood: 0, intensity: 0.7, confidence: 0.9});
+  const iv = setInterval(() => { k++; if (k >= 8) { clearInterval(iv); live.stop(); return; } live.set({mood: k, intensity: 0.7, confidence: 0.9}); }, 6000);
+});
+</script></body></html>

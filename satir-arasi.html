@@ -1,0 +1,220 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Satır Arası</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Yerleşim: solda sabit görsel levha, arada kitabın duygu ipliği, sağda düz kâğıt üstünde metin; altta tek satır çalar.
+   Ekrandaki tek renk o anki duygu (--mood); metnin arkasında renk ya da görsel yok. */
+:root{
+  --paper:#EEF0EF; --paper-2:#E3E6E5; --ink:#15181C; --ink-2:#555C63; --rule:#CDD2D1; --scrim:rgba(15,18,21,.45);
+  --m-huzur:#2C7F78; --m-huzun:#3F5F9E; --m-gerilim:#B5531B; --m-karanlik:#5B2A4A;
+  --m-nese:#A47C00; --m-ask:#B03A5B; --m-macera:#4F7422; --m-gizem:#5A45A0;
+  --mood:var(--m-huzur); --stage-bg:#fff; --ink-filter:none; --tint-blend:screen; --stage-blend:multiply;
+  --read:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --disp:'Instrument Serif','Source Serif 4',Georgia,serif;
+  --ui:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --pw:30vw; --gut:44px; --bar:48px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0F1215; --paper-2:#171B1F; --ink:#C8CDD0; --ink-2:#8A9299; --rule:#272D33; --scrim:rgba(0,0,0,.6);
+  --m-huzur:#6FC2B6; --m-huzun:#8AA6DC; --m-gerilim:#E79A5A; --m-karanlik:#B77FA4;
+  --m-nese:#E3C24E; --m-ask:#EC8CA3; --m-macera:#A6CB61; --m-gizem:#A995E4;
+  --stage-bg:#000; --ink-filter:invert(1); --tint-blend:multiply; --stage-blend:screen; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0F1215; --paper-2:#171B1F; --ink:#C8CDD0; --ink-2:#8A9299; --rule:#272D33; --scrim:rgba(0,0,0,.6);
+  --m-huzur:#6FC2B6; --m-huzun:#8AA6DC; --m-gerilim:#E79A5A; --m-karanlik:#B77FA4;
+  --m-nese:#E3C24E; --m-ask:#EC8CA3; --m-macera:#A6CB61; --m-gizem:#A995E4;
+  --stage-bg:#000; --ink-filter:invert(1); --tint-blend:multiply; --stage-blend:screen; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:13px;line-height:1.45;font-weight:500;letter-spacing:.01em}
+button,select,input,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.gutter{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+
+/* Levha */
+.plate{position:relative;height:150px;margin-top:calc(var(--bar) + 16px);overflow:hidden;background:var(--paper-2)}
+.pstage{background:var(--stage-bg);mix-blend-mode:var(--stage-blend)}
+.pimg{position:absolute;inset:0;background-size:contain;background-repeat:no-repeat;background-position:center;opacity:0;filter:var(--ink-filter);transition:opacity 3s linear}
+.pimg.on{opacity:1}
+.ptint{position:absolute;inset:0;background:var(--mood);mix-blend-mode:var(--tint-blend);transition:background-color 2.5s linear}
+.pfoot{display:none}
+body.noimg .plate{display:none}
+body.noimg main{padding-top:calc(var(--bar) + 16px)}
+
+/* İplik: kitabın duygu haritası */
+.thread{position:fixed;z-index:6;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + var(--bar));height:16px;background:var(--paper);cursor:pointer;touch-action:none;transition:transform .25s}
+.thread canvas{display:block;width:100%;height:100%}
+.tmark{position:absolute;background:var(--ink);pointer-events:none;left:0;top:2px;width:2px;height:12px}
+body.tophide .thread{transform:translateY(calc(-1 * var(--bar)))}
+
+/* Üst çubuk */
+.top{position:fixed;z-index:7;left:0;right:0;top:env(safe-area-inset-top,0px);height:var(--bar);background:var(--paper);border-bottom:1px solid var(--rule);transition:transform .25s}
+body.tophide .top{transform:translateY(-100%)}
+.trow{height:100%;display:flex;align-items:center;gap:.75rem}
+.brand{display:flex;align-items:center;gap:.55rem;background:none;border:0;padding:.4rem 0;font-family:var(--disp);font-style:italic;font-size:1.25rem;font-weight:400;letter-spacing:0;white-space:nowrap}
+.brand svg{flex:none}
+.tbook{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-2)}
+.tpos{flex:none;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* Metin */
+main{display:block}
+article{font-family:var(--read);font-size:var(--fs,17px);line-height:1.7;font-weight:400;letter-spacing:0;max-width:62ch;margin:0 auto;padding-block:0 60vh;font-variant-numeric:oldstyle-nums;font-optical-sizing:auto}
+.chunk{content-visibility:auto;contain-intrinsic-size:auto 2400px}
+article h2{font-family:var(--disp);font-style:italic;font-weight:400;font-size:1.7em;line-height:1.2;margin:2.6em 0 1em;text-wrap:balance}
+article p{margin:0 0 1.05em;position:relative;hyphens:auto;overflow-wrap:break-word}
+article p.now::before{content:"";position:absolute;left:-10px;top:.35em;bottom:.35em;width:2px;background:var(--mood);transition:background-color 2.5s linear}
+u.cue{text-decoration:underline;text-decoration-color:var(--c);text-decoration-thickness:2px;text-underline-offset:3px}
+span.said{text-decoration:underline;text-decoration-color:var(--mood);text-decoration-thickness:1px;text-underline-offset:4px}
+body.listening article p{cursor:pointer}
+
+/* Ön sayfa */
+.front{padding:9vh 0 8vh;border-bottom:1px solid var(--rule);margin-bottom:3.2em}
+.fkick{font-family:var(--ui);font-size:13px;color:var(--ink-2);margin:0 0 1.2rem}
+.ftitle{font-family:var(--disp);font-style:italic;font-weight:400;font-size:clamp(2.4rem,7vw,4.4rem);line-height:1.02;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.fauthor{font-family:var(--ui);font-size:15px;margin:.9rem 0 2.2rem;color:var(--ink-2)}
+.fbar{display:block;width:100%;height:22px}
+.fbarcap{font-family:var(--ui);font-size:12px;color:var(--ink-2);display:flex;justify-content:space-between;margin:.35rem 0 1.8rem}
+.fmeta{font-family:var(--ui);font-size:13px;display:grid;grid-template-columns:auto 1fr;gap:.3rem 1.2rem;margin:0}
+.fmeta dt{color:var(--ink-2)} .fmeta dd{margin:0;font-variant-numeric:lining-nums tabular-nums}
+.fhint{font-family:var(--ui);font-size:13px;color:var(--ink-2);margin:2rem 0 0}
+
+/* Çalar */
+.player{position:fixed;z-index:7;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--rule);padding-bottom:env(safe-area-inset-bottom,0px)}
+.prow{height:var(--bar);display:flex;align-items:center;gap:.4rem}
+.gl{flex:none;width:40px;height:40px;display:grid;place-items:center;background:none;border:0;border-radius:2px;padding:0}
+.gl svg{display:block}
+#play svg{color:var(--mood);transition:color 2.5s linear}
+#mic[aria-pressed="true"] svg{color:var(--mood)}
+#vol{width:5.5rem;accent-color:var(--ink);flex:none}
+.moodbtn{background:none;border:0;padding:.3rem .2rem;font-family:var(--disp);font-style:italic;font-size:1.3rem;font-weight:400;letter-spacing:0;white-space:nowrap;border-bottom:1px solid transparent}
+.moodbtn:hover{border-bottom-color:var(--ink)}
+.moodbtn.neutral{color:var(--ink-2)}
+.why{flex:1;min-width:0;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txt{background:none;border:0;border-bottom:1px solid var(--ink);padding:2px 0;white-space:nowrap}
+.toast{position:fixed;z-index:8;left:0;right:0;bottom:calc(var(--bar) + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding-block:.6rem;transition:opacity .3s}
+.toast:empty{display:none}
+
+/* Sayfalar (alt çekmece) */
+dialog{background:var(--paper);color:var(--ink);border:0;border-top:1px solid var(--ink);border-radius:2px 2px 0 0;padding:0;margin:auto auto 0;width:min(40rem,100%);max-width:100%;max-height:82vh}
+dialog::backdrop{background:var(--scrim)}
+.sheet{padding-block:1.2rem 1.6rem;display:flex;flex-direction:column;gap:1.3rem}
+.shead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+.shead h2{font-family:var(--disp);font-style:italic;font-weight:400;font-size:1.9rem;line-height:1.1;margin:0;letter-spacing:0}
+.sheet h3{font-size:12px;font-weight:600;color:var(--ink-2);margin:0 0 .5rem}
+.sheet section{display:flex;flex-direction:column;gap:.55rem;align-items:flex-start}
+.sheet p{margin:0;color:var(--ink-2)}
+.sheet input[type=text],.sheet textarea,.sheet select{background:var(--paper-2);border:1px solid var(--rule);border-radius:2px;padding:.5rem .6rem;width:100%}
+.sheet textarea{min-height:7rem;resize:vertical;font-family:var(--read);font-size:15px}
+.sheet input[type=file]{max-width:100%}
+.acts{display:flex;flex-wrap:wrap;gap:.6rem 1.6rem;font-family:var(--read);font-size:18px}
+.acts .txt{font-style:italic}
+.err{color:var(--m-ask)!important}
+.shelf{width:100%;display:flex;flex-direction:column}
+.srow{display:grid;grid-template-columns:1fr auto;gap:.1rem 1rem;align-items:baseline;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--rule);padding:.6rem 0}
+.srow b{font-family:var(--read);font-size:16px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow span{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.srow canvas{grid-column:1/-1;width:100%;height:4px;display:block;margin-top:.3rem}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%;border-top:1px solid var(--rule);padding-top:.6rem}
+.seg{display:flex;gap:0}
+.seg button{background:none;border:1px solid var(--rule);padding:.35rem .7rem;margin-left:-1px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.moods{display:flex;flex-wrap:wrap;gap:.4rem}
+.moods button{background:none;border:1px solid var(--rule);padding:.35rem .7rem;display:flex;align-items:center;gap:.4rem}
+.moods button i{width:8px;height:8px;background:var(--c);flex:none}
+.moods button[aria-pressed="true"]{border-color:var(--ink)}
+.cues{font-family:var(--read);font-size:16px;line-height:1.6;color:var(--ink)!important}
+.trk{display:grid;grid-template-columns:6rem 1fr;gap:.4rem .8rem;align-items:center;width:100%}
+.trk label{display:flex;align-items:center;gap:.5rem}
+.trk label i{width:8px;height:8px;background:var(--c);flex:none}
+details{width:100%} summary{cursor:pointer;padding:.3rem 0}
+.drop{position:fixed;inset:0;z-index:20;background:var(--scrim);display:grid;place-items:center;font-family:var(--disp);font-style:italic;font-size:2.4rem;color:#fff;pointer-events:none}
+
+@media (min-width:1100px){
+  .plate{position:fixed;left:0;top:0;bottom:0;width:var(--pw);height:auto;margin:0;display:flex;flex-direction:column}
+  .pstage{position:relative;flex:1;overflow:hidden}
+  .pfoot{display:block;flex:none;padding:18px 24px 22px;border-top:2px solid var(--mood);background:var(--paper-2);transition:border-color 2.5s linear}
+  .pfoot small{display:block;color:var(--ink-2);font-size:12px}
+  .pfoot strong{display:block;font-family:var(--disp);font-style:italic;font-weight:400;font-size:2.6rem;line-height:1.05;letter-spacing:0}
+  .thread{left:var(--pw);right:auto;top:0;bottom:0;width:var(--gut);height:auto;transform:none!important;border-right:1px solid var(--rule)}
+  .tmark{left:14px;top:0;width:16px;height:2px}
+  .top,.player,.toast{left:calc(var(--pw) + var(--gut))}
+  main{margin-left:calc(var(--pw) + var(--gut));padding-top:var(--bar)}
+  article{font-size:var(--fs,19px)}
+  article p.now::before{left:-16px}
+  body.noimg{--pw:0px} body.noimg main{padding-top:var(--bar)}
+  dialog{margin:auto auto 0 calc(var(--pw) + var(--gut) + (100vw - var(--pw) - var(--gut) - min(40rem, 100vw - var(--pw) - var(--gut))) / 2);width:min(40rem,calc(100vw - var(--pw) - var(--gut)))}
+}
+@media (max-width:1099px){ .pstage{position:absolute;inset:0} }
+@media (max-width:520px){ #vol{width:3.6rem} .why{display:none} .prow{justify-content:space-between} .tbook{display:none} .trow{justify-content:space-between} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+
+<aside class="plate" id="plate" aria-hidden="true">
+  <div class="pstage"><div class="pimg" id="pA"></div><div class="pimg" id="pB"></div><div class="ptint"></div></div>
+  <div class="pfoot"><small id="plateCap">Şu anki hava</small><strong id="plateMood">Huzur</strong></div>
+</aside>
+<div class="thread" id="thread" role="slider" aria-label="Kitaptaki konum ve duygu haritası" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><canvas id="threadCv"></canvas><div class="tmark" id="tmark"></div></div>
+
+<header class="top"><div class="trow gutter">
+  <button class="brand" id="brand" aria-label="Kitaplığı aç">
+    <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true"><path d="M1 4.5c5-1.4 13-1.8 20-.4" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><path d="M2 12c4-.8 9-.9 14-.3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    Satır Arası
+  </button>
+  <span class="tbook" id="tbook"></span>
+  <span class="tpos" id="tpos"></span>
+</div></header>
+
+<main class="gutter"><article id="text"></article></main>
+
+<div class="toast gutter" id="toast" role="status"></div>
+<footer class="player"><div class="prow gutter">
+  <button class="gl" id="play" aria-label="Müziği başlat"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path id="playGlyph" d="M6 3.5v15l12.5-7.5z" fill="currentColor"/></svg></button>
+  <input type="range" id="vol" min="0" max="100" value="60" aria-label="Ses düzeyi">
+  <button class="moodbtn" id="moodBtn" aria-haspopup="dialog" title="Neden bu müzik?">Huzur</button>
+  <span class="why" id="why">Müzik, okuduğun paragrafı izler</span>
+  <button class="gl" id="mic" aria-pressed="false" aria-label="Sesimi dinle, sayfayı sesimle ilerlet" hidden><svg width="20" height="22" viewBox="0 0 20 22" aria-hidden="true"><rect x="6.5" y="1.5" width="7" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 10.5a7 7 0 0 0 14 0M10 17.5v3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  <button class="txt" id="setBtn">Ayarlar</button>
+</div></footer>
+
+<dialog id="libDlg"><div class="sheet gutter">
+  <div class="shead"><h2>Kitaplık</h2><button class="txt" data-close>Kapat</button></div>
+  <section>
+    <div class="acts"><button class="txt" id="openFile">Dosya aç</button><button class="txt" id="showPaste">Metin yapıştır</button><button class="txt" id="sampleGo">Örnek öyküyü oku</button></div>
+    <input type="file" id="file" accept=".txt,.epub,text/plain,application/epub+zip" hidden>
+    <p id="fileMsg">.txt ya da .epub. Dosyayı sayfanın üstüne de bırakabilirsin. Metin bu tarayıcıdan çıkmaz.</p>
+  </section>
+  <section id="pasteBox" hidden>
+    <input type="text" id="pasteTitle" placeholder="Kitabın adı" aria-label="Kitabın adı">
+    <textarea id="pasteText" placeholder="Metni buraya yapıştır" aria-label="Kitabın metni"></textarea>
+    <button class="txt" id="pasteGo">Bu metni oku</button>
+  </section>
+  <section id="shelfBox" hidden><h3>Son okunanlar</h3><div class="shelf" id="shelf"></div></section>
+</div></dialog>
+
+<dialog id="setDlg"><div class="sheet gutter">
+  <div class="shead"><h2>Ayarlar</h2><button class="txt" data-close>Kapat</button></div>
+  <section>
+    <div class="setrow"><span>Yazı boyutu</span><div class="seg"><button id="fsDown" aria-label="Yazıyı küçült">A−</button><button id="fsUp" aria-label="Yazıyı büyüt">A+</button></div></div>
+    <div class="setrow"><span>Tema</span><div class="seg" id="themeSeg"><button data-v="">Sistem</button><button data-v="light">Açık</button><button data-v="dark">Koyu</button></div></div>
+    <div class="setrow"><label for="imgOn">Görsel levha</label><input type="checkbox" id="imgOn" checked></div>
+    <div class="setrow"><label for="ambOn">Ortam sesleri (yağmur, rüzgâr, dalga)</label><input type="checkbox" id="ambOn" checked></div>
+  </section>
+  <section><h3>Müzik kipi</h3><div class="moods" id="forceMoods"></div><p>Otomatikte müzik paragrafın havasını izler. Bir duygu seçersen kitap boyunca o çalar.</p></section>
+  <section><details><summary>Kendi parçalarını kullan</summary><p style="margin:.4rem 0 .8rem">Bir duyguya ses dosyası atarsan, o duygu geldiğinde üretilen müzik yerine senin parçan döngüde çalar. Dosyalar yalnızca bu sekme açıkken tutulur.</p><div class="trk" id="trkList"></div></details></section>
+  <section><p>Test alanı: <a href="test.html" style="color:inherit">algılama ve ses ölçümleri</a> (yalnızca yerel sunucuda).</p></section>
+</div></dialog>
+
+<dialog id="whyDlg"><div class="sheet gutter">
+  <div class="shead"><h2 id="whyTitle">Neden bu müzik?</h2><button class="txt" data-close>Kapat</button></div>
+  <section><p class="cues" id="whyText"></p><p id="whyMeta"></p></section>
+  <section><h3>Sence bu sahnenin havası ne?</h3><div class="moods" id="relabel"></div><p>Seçimin bu sahneye uygulanır ve bu kitap için hatırlanır.</p></section>
+</div></dialog>
+
+<div class="drop" id="drop" hidden>Kitabı bırak</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="core.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>

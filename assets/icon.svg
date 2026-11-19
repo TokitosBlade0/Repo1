@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%"><stop offset="0" stop-color="#1c2b45"/><stop offset="1" stop-color="#0c1424"/></radialGradient>
+    <linearGradient id="au" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1d79a"/><stop offset=".55" stop-color="#c9a05a"/><stop offset="1" stop-color="#9a6a35"/></linearGradient>
+    <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3e2b0"/><stop offset="1" stop-color="#c99c5c"/></linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- çerçeve halkası -->
+  <circle cx="256" cy="256" r="178" fill="none" stroke="url(#au)" stroke-width="9"/>
+  <circle cx="256" cy="256" r="164" fill="none" stroke="url(#au)" stroke-width="2.5" opacity=".7"/>
+  <path d="M256 66l12 14-12 14-12-14z M256 418l12 14-12 14-12-14z M66 256l14-12 14 12-14 12z M418 256l14-12 14 12-14 12z" fill="url(#au)"/>
+  <!-- yıldızlar -->
+  <path d="M256 118l5 13 13 5-13 5-5 13-5-13-13-5 13-5z" fill="url(#au)"/>
+  <circle cx="226" cy="134" r="3.5" fill="#e6c788"/><circle cx="286" cy="134" r="3.5" fill="#e6c788"/>
+  <!-- açık kitap -->
+  <path d="M120 176h18v170h-18z" fill="url(#au)" opacity=".85"/>
+  <path d="M138 168c40-8 82-6 114 12v178c-32-16-74-18-114-10z" fill="url(#pg)" stroke="#8a5d2c" stroke-width="3"/>
+  <path d="M260 180c32-18 74-20 114-12v180c-40-8-82-6-114 10z" fill="url(#pg)" stroke="#8a5d2c" stroke-width="3"/>
+  <path d="M252 180h8v178h-8z" fill="#8a5d2c"/>
+  <path d="M120 346c46-10 96-8 132 14h8c36-22 86-24 132-14v14c-46-8-94-6-130 14h-12c-36-20-84-22-130-14z" fill="url(#au)"/>
+  <!-- ses dalgası -->
+  <g stroke="#7a4f22" stroke-width="5" stroke-linecap="round">
+    <path d="M282 268v8M296 258v28M310 246v52M324 236v72M338 252v40M352 228v88M366 246v52M380 262v20"/>
+  </g>
+  <path d="M374 168c26 8 40 26 46 52M380 156c32 10 50 34 56 66" fill="none" stroke="url(#au)" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+</svg>
